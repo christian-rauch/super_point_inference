@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>super_pixel_inference</name>
+  <version>0.0.1</version>
+  <description>SuperPixel inference</description>
+
+  <maintainer email="Christian.Rauch@ed.ac.uk">Christian Rauch</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <build_depend>feature_matches_interface</build_depend>
+  <depend>torch_cpp</depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
