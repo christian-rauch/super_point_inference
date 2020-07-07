@@ -1,9 +1,18 @@
 #pragma once
 #include <feature_matches_interface.hpp>
 
-class SuperPixel : public FeatureMatchesInterface {
-public:
-  SuperPixel();
+struct SuperPixelImpl;
 
-  std::tuple<cv::Mat, std::vector<KeyPoint>> &getScore(const cv::Mat &colour, const cv::Mat &depth);
+class SuperPixel : public FeatureMatchesInterface
+{
+public:
+  SuperPixel(const std::string &model_path);
+
+  ~SuperPixel();
+
+  std::tuple<cv::Mat, Eigen::MatrixX2d, Eigen::MatrixXd> getFeatures(const cv::Mat &image) const;
+
+private:
+  SuperPixelImpl *impl;
+  const bool valid;
 };
