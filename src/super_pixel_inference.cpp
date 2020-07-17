@@ -87,17 +87,26 @@ SuperPixel::getFeatures(const cv::Mat &image) const
 
     // reshape to original input image dimension
     static const int cell = 8;
-    torch::Tensor heatmap = tensor_semi
+    const torch::Tensor heatmap = tensor_semi
             .slice(2, 0, -1)                                        // remove dust bin
             .reshape({img.rows/cell, img.cols/cell, cell, cell})
             .permute({0, 2, 1, 3})
             .reshape({img.rows, img.cols});
 
-    const auto tkp = sync();
+    // suppress non-maxima in local 3x3 neighbourhood
+    // TODO: make 'kernel_size' of 3 configurable
+    const torch::Tensor heatmap_nms = torch::nn::functional::max_pool2d(
+                heatmap.unsqueeze(0).unsqueeze(1),
+                torch::nn::MaxPool2dOptions({3,3}).stride({1,1}).padding(1)
+                ).squeeze(0).squeeze(0);
 
     // TODO: make 'conf_thresh' 0.015 configurable
+    const torch::Tensor mask_nms = torch::logical_and((heatmap>0.015), (heatmap==heatmap_nms));
+
+    const auto tkp = sync();
+
     // point coordinates in image space
-    const torch::Tensor pts = torch::nonzero(heatmap>0.015);
+    const torch::Tensor pts = torch::nonzero(mask_nms);
 
     // point coordinates in normalised [0,1] space
     const torch::Tensor pts_norm = torch::true_divide(pts.to(torch::kDouble), torch::tensor(input.sizes().slice(2,2), impl->device));
@@ -106,10 +115,10 @@ SuperPixel::getFeatures(const cv::Mat &image) const
     const torch::Tensor pts_norm_c = (pts_norm*2-1).to(torch::kFloat);
 
     // get descriptors at keypoint coordinates
-    const torch::Tensor desc = torch::nn::functional::grid_sample(
+    torch::Tensor desc = torch::nn::functional::grid_sample(
                 tensor_feat, pts_norm_c.unsqueeze(0).unsqueeze(0),
                 torch::nn::functional::GridSampleFuncOptions().align_corners(false)
-                ).squeeze().transpose(1, 0).to(torch::kDouble).cpu();
+                ).squeeze(0).squeeze(1).transpose(1, 0).to(torch::kDouble).cpu();
 
     assert(pts_norm.sizes()[0]==desc.sizes()[0]);
 
