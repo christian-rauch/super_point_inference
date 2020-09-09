@@ -19,12 +19,12 @@ void convertND(const torch::Tensor &tensor, cv::Mat &img) {
     std::memcpy(img.data, tensor.data_ptr<float>(), sizeof(float)*tensor.numel());
 }
 
-auto sync() {
 #ifdef BENCHMARK
+auto sync() {
     cudaDeviceSynchronize();
-#endif
     return std::chrono::high_resolution_clock::now();
 }
+#endif
 
 struct SuperPixelImpl
 {
@@ -62,7 +62,9 @@ SuperPixel::getFeatures(const cv::Mat &image) const
         return std::make_tuple<cv::Mat, Eigen::MatrixX2d, Eigen::MatrixXd>({}, {}, {});
     }
 
+#ifdef BENCHMARK
     const auto tinput = sync();
+#endif
 
     // convert RGB to grey-scale image in [0,1]
     cv::Mat img;
@@ -74,13 +76,17 @@ SuperPixel::getFeatures(const cv::Mat &image) const
     const torch::Tensor input = torch::from_blob(img.data, {1, 1, img.rows, img.cols}).to(impl->device);
 
     // inference on single image
+#ifdef BENCHMARK
     const auto tinf = sync();
+#endif
     const auto out = impl->module.forward({input}).toTuple();
 
     torch::Tensor tensor_semi = out->elements()[0].toTensor(); // heatmap
     torch::Tensor tensor_feat = out->elements()[1].toTensor(); // descriptors
 
+#ifdef BENCHMARK
     const auto thm = sync();
+#endif
 
     // softmax
     tensor_semi = torch::nn::functional::softmax(tensor_semi.squeeze(0), 0).permute({1, 2, 0});
@@ -103,7 +109,9 @@ SuperPixel::getFeatures(const cv::Mat &image) const
     // TODO: make 'conf_thresh' 0.015 configurable
     const torch::Tensor mask_nms = torch::logical_and((heatmap>0.015), (heatmap==heatmap_nms));
 
+#ifdef BENCHMARK
     const auto tkp = sync();
+#endif
 
     // point coordinates in image space
     const torch::Tensor pts = torch::nonzero(mask_nms);
@@ -122,7 +130,9 @@ SuperPixel::getFeatures(const cv::Mat &image) const
 
     assert(pts_norm.sizes()[0]==desc.sizes()[0]);
 
+#ifdef BENCHMARK
     const auto tformat = sync();
+#endif
 
     // N x 2 keypoint coordinates {(x_0, y_0), ..., (x_N, y_N)}
     // swap (y,x) -> (x,y)
@@ -136,9 +146,9 @@ SuperPixel::getFeatures(const cv::Mat &image) const
     cv::Mat feat;
     convertND(tensor_feat.squeeze(0).permute({1, 2, 0}).cpu(), feat);
 
+#ifdef BENCHMARK
     const auto tend = sync();
 
-#ifdef BENCHMARK
     std::cout << "input load (ms): " << std::chrono::duration<float, std::milli>(tinf - tinput).count() << std::endl;
     std::cout << "inference (ms): " << std::chrono::duration<float, std::milli>(thm - tinf).count() << std::endl;
     std::cout << "heatmap (ms): " << std::chrono::duration<float, std::milli>(tkp - thm).count() << std::endl;
