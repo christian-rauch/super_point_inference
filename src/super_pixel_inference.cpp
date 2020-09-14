@@ -72,6 +72,10 @@ SuperPixel::getFeatures(const cv::Mat &image) const
     img.convertTo(img, CV_32F);
     img /= 255;
 
+    // check that image dimension is dividable by cell
+    static constexpr int cell = 8;
+    assert(img.rows%cell==0 && img.cols%cell==0);
+
     // convert image to tensor
     const torch::Tensor input = torch::from_blob(img.data, {1, 1, img.rows, img.cols}).to(impl->device);
 
@@ -92,7 +96,6 @@ SuperPixel::getFeatures(const cv::Mat &image) const
     tensor_semi = torch::nn::functional::softmax(tensor_semi.squeeze(0), 0).permute({1, 2, 0});
 
     // reshape to original input image dimension
-    static const int cell = 8;
     const torch::Tensor heatmap = tensor_semi
             .slice(2, 0, -1)                                        // remove dust bin
             .reshape({img.rows/cell, img.cols/cell, cell, cell})
