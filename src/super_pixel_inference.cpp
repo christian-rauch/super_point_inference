@@ -16,7 +16,7 @@ void convertND(const torch::Tensor &tensor, cv::Mat &img) {
     assert(tensor.dtype()==torch::kFloat32);
     const auto sizes = tensor.sizes();
     img.create(sizes[0], sizes[1], CV_32FC(sizes[2]));
-    std::memcpy(img.data, tensor.data_ptr<float>(), sizeof(float)*tensor.numel());
+    std::memcpy(img.data, tensor.contiguous().data_ptr<float>(), sizeof(float)*tensor.numel());
 }
 
 #ifdef BENCHMARK
@@ -116,11 +116,8 @@ SuperPixel::getFeatures(const cv::Mat &image) const
     const auto tkp = sync();
 #endif
 
-    // point coordinates in image space
-    const torch::Tensor pts = torch::nonzero(mask_nms);
-
-    // point coordinates in normalised [0,1] space
-    const torch::Tensor pts_norm = torch::true_divide(pts.to(torch::kDouble), torch::tensor(input.sizes().slice(2,2), impl->device));
+    // point coordinates in normalised [0,1] image space (x,y)
+    const torch::Tensor pts_norm = torch::roll(torch::nonzero(mask_nms).to(torch::kDouble) / torch::tensor(input.sizes().slice(2,2), impl->device), 1, 1);
 
     // centred point coordinates normalised in [-1,+1]
     const torch::Tensor pts_norm_c = (pts_norm*2-1).to(torch::kFloat);
@@ -133,17 +130,18 @@ SuperPixel::getFeatures(const cv::Mat &image) const
 
     assert(pts_norm.sizes()[0]==desc.sizes()[0]);
 
+    // normalise
+    desc = desc / torch::norm(desc, 2, 1, true);
+
 #ifdef BENCHMARK
     const auto tformat = sync();
 #endif
 
     // N x 2 keypoint coordinates {(x_0, y_0), ..., (x_N, y_N)}
-    // swap (y,x) -> (x,y)
-    const auto yx = torch::stack({pts_norm.slice(1,1,2), pts_norm.slice(1,0,1)}).transpose(1,0).to(torch::kDouble).cpu();
-    const Eigen::MatrixX2d coord = Eigen::Map<Eigen::MatrixX2d>(yx.data_ptr<double>(), yx.sizes()[0], yx.sizes()[1]);
+    const Eigen::MatrixX2d coord = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 2, Eigen::RowMajor>>(pts_norm.cpu().contiguous().data_ptr<double>(), pts_norm.sizes()[0], pts_norm.sizes()[1]);
 
     // N x D keypoint descriptors {f_0, ..., f_n} with f as 1 x D row-vector
-    const Eigen::MatrixXd descr = Eigen::Map<Eigen::MatrixXd>(desc.data_ptr<double>(), desc.sizes()[0], desc.sizes()[1]);
+    const Eigen::MatrixXd descr = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(desc.contiguous().data_ptr<double>(), desc.sizes()[0], desc.sizes()[1]);
 
     // featuremap with dense descriptors
     cv::Mat feat;
