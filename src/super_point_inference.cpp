@@ -1,4 +1,4 @@
-#include <super_pixel_inference.hpp>
+#include <super_point_inference.hpp>
 #include <torch/torch.h>
 #include <torch/script.h>
 
@@ -26,14 +26,14 @@ auto sync() {
 }
 #endif
 
-struct SuperPixelImpl
+struct SuperPointImpl
 {
     const torch::Device device;
     torch::jit::script::Module module;
 };
 
-SuperPixel::SuperPixel(const std::string &model_path)
-    : impl(new SuperPixelImpl({.device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU})),
+SuperPoint::SuperPoint(const std::string &model_path)
+    : impl(new SuperPointImpl({.device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU})),
       valid(!model_path.empty())
 {
     // load model
@@ -49,13 +49,13 @@ SuperPixel::SuperPixel(const std::string &model_path)
 #endif
 }
 
-SuperPixel::~SuperPixel()
+SuperPoint::~SuperPoint()
 {
     delete impl;
 }
 
 std::tuple<cv::Mat, Eigen::MatrixX2d, Eigen::MatrixXd>
-SuperPixel::getFeatures(const cv::Mat &image) const
+SuperPoint::getFeatures(const cv::Mat &image) const
 {
     if(!valid) {
         // return empty matrices if we do not have a model loaded

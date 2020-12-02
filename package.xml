@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>super_pixel_inference</name>
+  <name>super_point_inference</name>
   <version>0.0.1</version>
-  <description>SuperPixel inference</description>
+  <description>SuperPoint inference</description>
 
   <maintainer email="Christian.Rauch@ed.ac.uk">Christian Rauch</maintainer>
 

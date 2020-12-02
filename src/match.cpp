@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <super_pixel_inference.hpp>
+#include <super_point_inference.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
   const std::string keypoint_predictor_path = argv[1];
 
   // load trained model
-  const std::shared_ptr<FeatureMatchesInterface> sp = std::make_shared<SuperPixel>(keypoint_predictor_path);
+  const std::shared_ptr<FeatureMatchesInterface> sp = std::make_shared<SuperPoint>(keypoint_predictor_path);
 
   // load images
   std::vector<cv::Mat> img;

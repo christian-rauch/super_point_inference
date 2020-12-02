@@ -1,18 +1,18 @@
 #pragma once
 #include <feature_matches_interface.hpp>
 
-struct SuperPixelImpl;
+struct SuperPointImpl;
 
-class SuperPixel : public FeatureMatchesInterface
+class SuperPoint : public FeatureMatchesInterface
 {
 public:
-  SuperPixel(const std::string &model_path);
+  SuperPoint(const std::string &model_path);
 
-  ~SuperPixel();
+  ~SuperPoint();
 
   std::tuple<cv::Mat, Eigen::MatrixX2d, Eigen::MatrixXd> getFeatures(const cv::Mat &image) const;
 
 private:
-  SuperPixelImpl *impl;
+  SuperPointImpl *impl;
   const bool valid;
 };

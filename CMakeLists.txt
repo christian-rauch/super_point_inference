@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-project(super_pixel_inference CXX)
+project(super_point_inference CXX)
 
 find_package(feature_matches_interface REQUIRED)
 
 find_package(Torch REQUIRED)
 
-add_library(${PROJECT_NAME} SHARED src/super_pixel_inference.cpp)
+add_library(${PROJECT_NAME} SHARED src/super_point_inference.cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC feature_matches_interface)
 target_link_libraries(${PROJECT_NAME} PRIVATE torch)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
