@@ -74,7 +74,8 @@ SuperPoint::getFeatures(const cv::Mat &image) const
 
     // check that image dimension is dividable by cell
     static constexpr int cell = 8;
-    assert(img.rows%cell==0 && img.cols%cell==0);
+    if (img.rows%cell!=0 || img.cols%cell!=0)
+        throw std::runtime_error("image dimensions ("+std::to_string(img.cols)+" x "+std::to_string(img.rows)+") must be multiple of cell size ("+std::to_string(cell)+")");
 
     // convert image to tensor
     const torch::Tensor input = torch::from_blob(img.data, {1, 1, img.rows, img.cols}).to(impl->device);
