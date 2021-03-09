@@ -5,6 +5,9 @@
 #include <super_point_inference.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 
 std::vector<std::tuple<int, int, float>>
@@ -87,10 +90,12 @@ draw_matches(const Eigen::MatrixXf &last_keypoints,
 }
 
 int main(int argc, char *argv[]) {
-  if (argc<4)
+  if (argc<4) {
+    std::cerr << "wrong set of arguments, expected:" << std::endl << argv[0] << " <model_path> <image_1_path> ... <image_N_path>" << std::endl;
     return EXIT_FAILURE;
+  }
 
-  // read command line arguments: <model_path> <image_1_path> <image_2_path>
+  // read command line arguments: <model_path> <image_1_path> ... <image_N_path>
   const std::string keypoint_predictor_path = argv[1];
 
   // load trained model
@@ -115,7 +120,10 @@ int main(int argc, char *argv[]) {
     if (i>0) {
       const auto matches = pairwise_matches(descr[i-1].cast<float>(), descr[i].cast<float>());
       const cv::Mat img_matches = draw_matches(coord[i-1].cast<float>(), coord[i].cast<float>(), matches, img[i-1], img[i]);
-      cv::imshow("matches "+std::to_string(i-1)+"-"+std::to_string(i), img_matches);
+      // export matches
+      const std::string match_name = "matches "+std::to_string(i-1)+"-"+std::to_string(i);
+      cv::imshow(match_name, img_matches);
+      cv::imwrite(fs::temp_directory_path() / fs::path(match_name+".png"), img_matches);
     }
   }
   cv::waitKey();

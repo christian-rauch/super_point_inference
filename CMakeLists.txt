@@ -13,7 +13,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 target_link_options(${PROJECT_NAME} PRIVATE ${TORCH_CXX_FLAGS})
 
 add_executable(superpoint_match src/match.cpp)
-target_link_libraries(superpoint_match PUBLIC ${PROJECT_NAME})
+target_link_libraries(superpoint_match PUBLIC ${PROJECT_NAME} "stdc++fs")
 
 include(GNUInstallDirs)
 target_include_directories(${PROJECT_NAME} PUBLIC
