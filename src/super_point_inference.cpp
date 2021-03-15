@@ -34,7 +34,8 @@ struct SuperPointImpl
 
 SuperPoint::SuperPoint(const std::string &model_path)
     : impl(new SuperPointImpl({.device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU})),
-      valid(!model_path.empty())
+      valid(!model_path.empty()),
+      point_min_score(0.015)
 {
     // load model
     if(valid) {
@@ -110,8 +111,7 @@ SuperPoint::getFeatures(const cv::Mat &image) const
                 torch::nn::MaxPool2dOptions({3,3}).stride({1,1}).padding(1)
                 ).squeeze(0).squeeze(0);
 
-    // TODO: make 'conf_thresh' 0.015 configurable
-    const torch::Tensor mask_nms = torch::logical_and((heatmap>0.015), (heatmap==heatmap_nms));
+    const torch::Tensor mask_nms = torch::logical_and((heatmap>point_min_score), (heatmap==heatmap_nms));
 
 #ifdef BENCHMARK
     const auto tkp = sync();
@@ -160,4 +160,10 @@ SuperPoint::getFeatures(const cv::Mat &image) const
 #endif
 
     return {feat, coord, descr};
+}
+
+void
+SuperPoint::setScoreMin(float min_score)
+{
+    this->point_min_score = min_score;
 }
