@@ -40,3 +40,5 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
 )
 
 install(TARGETS superpoint_match RUNTIME DESTINATION ${BINDIR})
+
+install(FILES weights/SuperPointNet.pt DESTINATION ${CMAKE_INSTALL_DATADIR}/weights)
