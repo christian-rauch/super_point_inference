@@ -41,7 +41,7 @@ cv::Mat
 draw_matches(const Eigen::MatrixXf &last_keypoints,
              const Eigen::MatrixXf &next_keypoints,
              const std::vector<std::tuple<int, int, float>> &correspondences,
-             const cv::Mat &last_img, const cv::Mat &next_img = {})
+             const cv::Mat &last_img, const cv::Mat &next_img)
 {
   std::vector<cv::DMatch> matches;
   for(const auto &match : correspondences)
@@ -53,12 +53,10 @@ draw_matches(const Eigen::MatrixXf &last_keypoints,
 
   std::vector<cv::KeyPoint> next_kp(next_keypoints.rows());
   for(size_t i=0; i<next_kp.size(); i++)
-      next_kp[i].pt = cv::Point(next_keypoints.row(i)[0]*last_img.cols, next_keypoints.row(i)[1]*last_img.rows);
+      next_kp[i].pt = cv::Point(next_keypoints.row(i)[0]*next_img.cols, next_keypoints.row(i)[1]*next_img.rows);
 
   cv::Mat img_matches;
-  // use given current/next or empty image
-  const cv::Mat current = next_img.empty() ? cv::Mat(last_img.size(), CV_8UC1, cv::Scalar(255)): next_img;
-  cv::drawMatches(current, next_kp, last_img, last_kp, matches, img_matches,
+  cv::drawMatches(next_img, next_kp, last_img, last_kp, matches, img_matches,
                   cv::Scalar::all(-1), cv::Scalar::all(-1), std::vector<char>(),
                   cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
   return img_matches;
