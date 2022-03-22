@@ -12,50 +12,25 @@ namespace fs = std::experimental::filesystem;
 
 std::vector<std::tuple<int, int, float>>
 pairwise_matches(const Eigen::MatrixXf &last_keypoints,
-                 const Eigen::MatrixXf &next_keypoints,
-                 const cv::Mat_<bool> &last_mask = {})
+                 const Eigen::MatrixXf &next_keypoints)
 {
-  // remove 'last' keypoint coordinates outside of mask
-  Eigen::MatrixXf last_keypoints_mask = Eigen::MatrixXf::Constant(last_keypoints.rows(), last_keypoints.cols(), std::numeric_limits<float>::signaling_NaN());
-  std::vector<int> last_mask_id;
-  if (!last_mask.empty()) {
-    int kp_matches = 0;
-    for(int i=0; i<last_keypoints.rows(); i++) {
-        const Eigen::Array2f xy_norm = last_keypoints.leftCols(2).row(i);
-        const cv::Point2i xy(xy_norm.x()*last_mask.cols, xy_norm.y()*last_mask.rows);
-        if (last_mask.at<bool>(xy)) {
-          // copy match over
-          last_keypoints_mask.row(kp_matches) = last_keypoints.row(i);
-          kp_matches++;
-          // store original ID of last keypoint within valid segment
-          last_mask_id.push_back(i);
-        }
-    }
-    last_keypoints_mask.conservativeResize(kp_matches, Eigen::NoChange);
-  }
-  else {
-    // use all keypoints
-    last_keypoints_mask = last_keypoints;
-  }
-
   // store correspondences (last_id, next_id)
   std::vector<std::tuple<int, int, float>> match_ids;
 
-  if (last_keypoints_mask.rows()>0) {
+  if (last_keypoints.rows()>0) {
     cv::Mat last_descr;
-    cv::eigen2cv(Eigen::MatrixXf(last_keypoints_mask.rightCols(last_keypoints_mask.cols()-2)), last_descr);
+    cv::eigen2cv(Eigen::MatrixXf(last_keypoints.rightCols(last_keypoints.cols()-2)), last_descr);
     cv::Mat next_descr;
     cv::eigen2cv(Eigen::MatrixXf(next_keypoints.rightCols(next_keypoints.cols()-2)), next_descr);
 
+    // match descriptor pairs (query=next, train=last)
     std::vector<cv::DMatch> matches;
     cv::BFMatcher(cv::NORM_L2, true).match(next_descr, last_descr, matches);
 
     for(const cv::DMatch &match : matches) {
       if (match.distance>0.7)
         continue;
-      match_ids.push_back(std::make_tuple(last_mask.empty() ? match.trainIdx : last_mask_id[match.trainIdx],
-                                          match.queryIdx,
-                                          match.distance));
+      match_ids.push_back(std::make_tuple(match.trainIdx, match.queryIdx, match.distance));
     }
   }
 
