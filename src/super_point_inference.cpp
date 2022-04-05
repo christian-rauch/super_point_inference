@@ -12,13 +12,6 @@
 
 #include <opencv2/opencv.hpp>
 
-void convertND(const torch::Tensor &tensor, cv::Mat &img) {
-    assert(tensor.dtype()==torch::kFloat32);
-    const auto sizes = tensor.sizes();
-    img.create(sizes[0], sizes[1], CV_32FC(sizes[2]));
-    std::memcpy(img.data, tensor.contiguous().data_ptr<float>(), sizeof(float)*tensor.numel());
-}
-
 #ifdef BENCHMARK
 auto sync() {
     cudaDeviceSynchronize();
@@ -55,12 +48,12 @@ SuperPoint::~SuperPoint()
     delete impl;
 }
 
-std::tuple<cv::Mat, Eigen::MatrixX2d, Eigen::MatrixXd>
+std::tuple<Eigen::MatrixX2d, Eigen::MatrixXd>
 SuperPoint::getFeatures(const cv::Mat &image) const
 {
     if(!valid) {
         // return empty matrices if we do not have a model loaded
-        return std::make_tuple<cv::Mat, Eigen::MatrixX2d, Eigen::MatrixXd>({}, {}, {});
+        return std::make_tuple<Eigen::MatrixX2d, Eigen::MatrixXd>({}, {});
     }
 
 #ifdef BENCHMARK
@@ -144,10 +137,6 @@ SuperPoint::getFeatures(const cv::Mat &image) const
     // N x D keypoint descriptors {f_0, ..., f_n} with f as 1 x D row-vector
     const Eigen::MatrixXd descr = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(desc.contiguous().data_ptr<double>(), desc.sizes()[0], desc.sizes()[1]);
 
-    // featuremap with dense descriptors
-    cv::Mat feat;
-    convertND(tensor_feat.squeeze(0).permute({1, 2, 0}).cpu(), feat);
-
 #ifdef BENCHMARK
     const auto tend = sync();
 
@@ -159,7 +148,7 @@ SuperPoint::getFeatures(const cv::Mat &image) const
     std::cout << "TOTAL (ms): " << std::chrono::duration<float, std::milli>(tend - tinput).count() << std::endl;
 #endif
 
-    return {feat, coord, descr};
+    return {coord, descr};
 }
 
 void

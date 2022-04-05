@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(super_point_inference CXX)
 
-find_package(feature_matches_interface REQUIRED)
-
+find_package(OpenCV REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Torch REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED src/super_point_inference.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC feature_matches_interface)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE torch)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 
@@ -19,6 +19,8 @@ set_property(TARGET superpoint_match PROPERTY CXX_STANDARD 17)
 include(GNUInstallDirs)
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    ${OpenCV_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>
 )
 

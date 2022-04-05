@@ -10,8 +10,9 @@
 
   <buildtool_depend>cmake</buildtool_depend>
 
-  <build_depend>feature_matches_interface</build_depend>
   <depend>torch_cpp</depend>
+  <depend>libopencv-dev</depend>
+  <depend>eigen</depend>
 
   <export>
     <build_type>cmake</build_type>

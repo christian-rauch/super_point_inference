@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
   const std::string keypoint_predictor_path = argv[1];
 
   // load trained model
-  const std::shared_ptr<FeatureMatchesInterface> sp = std::make_shared<SuperPoint>(keypoint_predictor_path);
+  const SuperPoint sp(keypoint_predictor_path);
 
   // load images
   std::vector<cv::Mat> img;
@@ -118,12 +118,11 @@ int main(int argc, char *argv[]) {
 
   std::vector<Eigen::MatrixX2d> coord(img.size());
   std::vector<Eigen::MatrixXd> descr(img.size());
-  std::vector<cv::Mat> feat(img.size());
   for(int i=0; i<img.size(); i++) {
     // convert to RGB for inference
     cv::Mat rgb;
     cv::cvtColor(img[i], rgb, cv::COLOR_BGR2RGB);
-    std::tie(feat[i], coord[i], descr[i]) = sp->getFeatures(rgb);
+    std::tie(coord[i], descr[i]) = sp.getFeatures(rgb);
     if (i>0) {
       // draw & export matches
       const auto matches = pairwise_matches(descr[i-1].cast<float>(), descr[i].cast<float>());
