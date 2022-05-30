@@ -1,0 +1,4 @@
+repositories:
+  src/torch_cpp:
+    type: git
+    url: https://github.com/christian-rauch/torch_cpp.git
