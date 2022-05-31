@@ -11,6 +11,9 @@
 #endif
 
 #include <opencv2/opencv.hpp>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 #ifdef BENCHMARK
 auto sync() {
@@ -27,17 +30,14 @@ struct SuperPointImpl
 
 SuperPoint::SuperPoint(const std::string &model_path)
     : impl(new SuperPointImpl({.device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU})),
-      valid(!model_path.empty()),
       point_min_score(0.015)
 {
+    if (!fs::is_regular_file(model_path))
+        throw fs::filesystem_error("invalid model file", model_path, std::make_error_code(std::errc::no_such_file_or_directory));
+
     // load model
-    if(valid) {
-        try {
-            impl->module = torch::jit::load(model_path, impl->device);
-        } catch (const c10::Error &e) {
-            std::cerr << "invalid model file: " << e.what() << std::endl;
-        }
-    }
+    impl->module = torch::jit::load(model_path, impl->device);
+
 #ifdef BENCHMARK
     at::globalContext().setBenchmarkCuDNN(true);
 #endif
@@ -51,11 +51,6 @@ SuperPoint::~SuperPoint()
 std::tuple<Eigen::MatrixX2d, Eigen::MatrixXd>
 SuperPoint::getFeatures(const cv::Mat &image) const
 {
-    if(!valid) {
-        // return empty matrices if we do not have a model loaded
-        return std::make_tuple<Eigen::MatrixX2d, Eigen::MatrixXd>({}, {});
-    }
-
 #ifdef BENCHMARK
     const auto tinput = sync();
 #endif

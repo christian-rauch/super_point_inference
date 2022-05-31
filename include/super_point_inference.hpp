@@ -25,6 +25,5 @@ public:
 
 private:
   SuperPointImpl *impl;
-  const bool valid;
   float point_min_score;
 };

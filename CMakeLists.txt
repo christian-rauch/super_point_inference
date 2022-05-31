@@ -11,13 +11,13 @@ find_package(Torch REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED src/super_point_inference.cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} PRIVATE torch)
+target_link_libraries(${PROJECT_NAME} PRIVATE torch "stdc++fs")
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 
 target_link_options(${PROJECT_NAME} PRIVATE ${TORCH_CXX_FLAGS})
 
 add_executable(superpoint_match src/match.cpp)
-target_link_libraries(superpoint_match PUBLIC ${PROJECT_NAME} "stdc++fs")
+target_link_libraries(superpoint_match PRIVATE ${PROJECT_NAME})
 set_property(TARGET superpoint_match PROPERTY CXX_STANDARD 17)
 
 include(GNUInstallDirs)
