@@ -67,11 +67,14 @@ If you use the original work by Daniel DeTone et al., please cite their work:
 
 If you use this implementation, please cite our work:
 ```bibtex
-@misc{Rauch2022,
-  doi =       {10.48550/ARXIV.2204.11923},
-  author =    {Rauch, Christian and Long, Ran and Ivan, Vladimir and Vijayakumar, Sethu},
-  title =     {Sparse-Dense Motion Modelling and Tracking for Manipulation without Prior Object Models},
-  publisher = {arXiv},
-  year =      {2022},
+@ARTICLE{Rauch2022,
+  author={Rauch, Christian and Long, Ran and Ivan, Vladimir and Vijayakumar, Sethu},
+  journal={IEEE Robotics and Automation Letters},
+  title={Sparse-Dense Motion Modelling and Tracking for Manipulation Without Prior Object Models},
+  year={2022},
+  volume={7},
+  number={4},
+  pages={11394-11401},
+  doi={10.1109/LRA.2022.3200177}
 }
 ```
