@@ -12,7 +12,7 @@ find_package(Torch REQUIRED)
 add_library(${PROJECT_NAME} SHARED src/super_point_inference.cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE torch "stdc++fs")
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_options(${PROJECT_NAME} PRIVATE ${TORCH_CXX_FLAGS})
 
