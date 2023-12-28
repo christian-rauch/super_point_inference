@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(super_point_inference CXX)
 
-if(NOT DEFINED ENV{CUDACXX})
-    set(ENV{CUDACXX} "/usr/local/cuda/bin/nvcc")
-endif()
-
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Torch REQUIRED)
