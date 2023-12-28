@@ -12,10 +12,12 @@ jobs:
         ros_distribution: [noetic, humble]
         include:
           - docker_image: ubuntu:20.04
+            cuda_distribution: ubuntu2004
             ros_distribution: noetic
             ros_version: 1
 
           - docker_image: ubuntu:22.04
+            cuda_distribution: ubuntu2204
             ros_distribution: humble
             ros_version: 2
 
@@ -28,19 +30,9 @@ jobs:
           apt update
           apt install --no-install-recommends -y ca-certificates gnupg wget software-properties-common
 
-      - name: install CUDA (Ubuntu 20.04)
-        if: ${{ matrix.docker_image == 'ubuntu:20.04' }}
+      - name: install CUDA
         run: |
-          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-          mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-          apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
-          add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
-          apt install --no-install-recommends -y libcurand-dev-11-3 libcufft-dev-11-3 libcublas-dev-11-3 cuda-nvcc-11-3 cuda-nvtx-11-3 cuda-nvrtc-dev-11-3 libcudnn8-dev
-
-      - name: install CUDA (Ubuntu 22.04)
-        if: ${{ matrix.docker_image == 'ubuntu:22.04' }}
-        run: |
-          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+          wget https://developer.download.nvidia.com/compute/cuda/repos/${{ matrix.cuda_distribution }}/x86_64/cuda-keyring_1.1-1_all.deb
           dpkg -i cuda-keyring_1.1-1_all.deb
           rm cuda-keyring_1.1-1_all.deb
           apt update
