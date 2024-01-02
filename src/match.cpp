@@ -5,7 +5,6 @@
 #include <random>
 #include <super_point_inference.hpp>
 #include <opencv2/opencv.hpp>
-#include <opencv2/viz/types.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <experimental/filesystem>
 
@@ -88,9 +87,8 @@ draw_tracks(const Eigen::MatrixXf &last_keypoints,
   for (const auto &[last_id, next_id, distance]: correspondences) {
     // sample random colour with track-specific seed
     g.seed(last_id);
-    const cv::viz::Color c(u(g)*255, u(g)*255, u(g)*255);
     // draw track segments
-    cv::line(img_tracks, last_kp[last_id], next_kp[next_id], c, 2);
+    cv::line(img_tracks, last_kp[last_id], next_kp[next_id], {u(g)*255, u(g)*255, u(g)*255}, 2);
   }
 
   return img_tracks;
