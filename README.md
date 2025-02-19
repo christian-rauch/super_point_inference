@@ -34,7 +34,7 @@ This C++ implementation of SuperPoint requires [LibTorch](https://pytorch.org/cp
     # resolve binary dependencies
     rosdep install --from-paths src --ignore-src -y
     # build workspace
-    colcon build --cmake-args -D CMAKE_BUILD_TYPE=Release -D CMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+    colcon build --cmake-args -D CMAKE_BUILD_TYPE=Release
     ```
 
 The `torch_cpp` and `super_point_inference` packages will be installed to `~/super_point_ws/install/`. After sourcing the workspace via `source ~/super_point_ws/install/setup.bash` those packages will be discoverable by CMake.

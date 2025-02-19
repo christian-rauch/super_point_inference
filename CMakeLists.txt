@@ -1,5 +1,9 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.17)
 project(super_point_inference CXX)
+
+find_package(CUDAToolkit REQUIRED)
+
+set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)

@@ -54,7 +54,6 @@ jobs:
         with:
           package-name: super_point_inference
           target-ros1-distro: ${{ matrix.ros_distribution }}
-          extra-cmake-args: "-D CMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc"
           vcs-repo-file-url: .github/dependencies.yaml
 
       - name: ROS 2 CI Action
@@ -63,5 +62,4 @@ jobs:
         with:
           package-name: super_point_inference
           target-ros2-distro: ${{ matrix.ros_distribution }}
-          extra-cmake-args: "-D CMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc"
           vcs-repo-file-url: .github/dependencies.yaml
