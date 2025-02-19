@@ -8,6 +8,7 @@ jobs:
     # https://github.com/ros-tooling/setup-ros#iterating-on-all-ros-distributions-for-all-platforms
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - docker_image: ubuntu:20.04
