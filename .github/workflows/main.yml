@@ -11,11 +11,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - docker_image: ubuntu:20.04
-            cuda_distribution: ubuntu2004
-            ros_distribution: noetic
-            ros_version: 1
-
           - docker_image: ubuntu:22.04
             cuda_distribution: ubuntu2204
             ros_distribution: humble
