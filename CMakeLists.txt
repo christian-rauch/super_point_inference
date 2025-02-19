@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.24)
 project(super_point_inference CXX)
+
+set(CMAKE_CUDA_ARCHITECTURES "native")
 
 find_package(CUDAToolkit REQUIRED)
 
